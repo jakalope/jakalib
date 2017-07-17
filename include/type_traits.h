@@ -1,9 +1,9 @@
-#ifndef JAKALOPE__TYPE_TRAITS_H
-#define JAKALOPE__TYPE_TRAITS_H
+#ifndef JAKALIB__TYPE_TRAITS_H
+#define JAKALIB__TYPE_TRAITS_H
 
 #include <type_traits>
 
-namespace jakalope {
+namespace jakalib {
 
 // Origin:
 // http://en.cppreference.com/mwiki/
@@ -21,7 +21,7 @@ struct nonesuch {
 //     index.php?title=cpp/types/void_t&oldid=89901
 
 template <typename... Ts>
-struct make_void {
+struct make_void final {
   typedef void type;
 };
 
@@ -37,14 +37,13 @@ template <class Default,
           class AlwaysVoid,
           template <class...> class Op,
           class... Args>
-struct detector {
+struct detector final {
   using value_t = std::false_type;
   using type = Default;
 };
 
 template <class Default, template <class...> class Op, class... Args>
-struct detector<Default, void_t<Op<Args...>>, Op, Args...> {
-  // Note that std::void_t is a C++17 feature
+struct detector<Default, void_t<Op<Args...>>, Op, Args...> final {
   using value_t = std::true_type;
   using type = Op<Args...>;
 };
@@ -61,6 +60,12 @@ using detected_t = typename detail::detector<nonesuch, void, Op, Args...>::type;
 template <class Default, template <class...> class Op, class... Args>
 using detected_or = detail::detector<Default, void, Op, Args...>;
 
-} // namespace jakalope
+template <class Expected, template <class...> class Op, class... Args>
+using is_detected_exact = std::is_same<Expected, detected_t<Op, Args...>>;
+
+template <class Default, template <class...> class Op, class... Args>
+using detected_or_t = typename detected_or<Default, Op, Args...>::type;
+
+} // namespace jakalib
 
 #endif
