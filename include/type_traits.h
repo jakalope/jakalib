@@ -1,7 +1,6 @@
 #ifndef JAKALIB__TYPE_TRAITS_H
 #define JAKALIB__TYPE_TRAITS_H
 
-#include "impl/invoke.hpp"
 #include <type_traits>
 
 namespace jakalib {
@@ -25,6 +24,99 @@ struct bool_constant {
     return value;
   }
 };
+
+//
+// invoke_result
+//
+// Origin:
+// http://en.cppreference.com/mwiki/
+//     index.php?title=cpp/types/result_of&oldid=94402
+
+namespace detail {
+
+template <class F, class... Args>
+inline auto INVOKE(F&& f, Args&&... args)
+    -> decltype(std::forward<F>(f)(std::forward<Args>(args)...));
+
+template <class Base, class T, class Derived>
+inline auto INVOKE(T Base::*pmd, Derived&& ref)
+    -> decltype(std::forward<Derived>(ref).*pmd);
+
+template <class PMD, class Pointer>
+inline auto INVOKE(PMD&& pmd, Pointer&& ptr)
+    -> decltype((*std::forward<Pointer>(ptr)).*pmd);
+
+template <class Base, class T, class Derived, class... Args>
+inline auto INVOKE(T Base::*pmf, Derived&& ref, Args&&... args)
+    -> decltype((std::forward<Derived>(ref).*pmf)(std::forward<Args>(args)...));
+
+template <class PMF, class Pointer, class... Args>
+inline auto INVOKE(PMF&& pmf, Pointer&& ptr, Args&&... args)
+    -> decltype(((*std::forward<Pointer>(ptr)).*
+                 pmf)(std::forward<Args>(args)...));
+
+} // namespace detail
+
+// Conforming C++14 implementation (is also a valid C++11 implementation):
+namespace detail {
+template <typename AlwaysVoid, typename, typename...>
+struct invoke_result {};
+
+template <typename F, typename... Args>
+struct invoke_result<decltype(void(detail::INVOKE(std::declval<F>(),
+                                                  std::declval<Args>()...))),
+                     F,
+                     Args...> {
+  using type =
+      decltype(detail::INVOKE(std::declval<F>(), std::declval<Args>()...));
+};
+} // namespace detail
+
+template <class>
+struct result_of;
+
+template <class F, class... ArgTypes>
+struct result_of<F(ArgTypes...)> : detail::invoke_result<void, F, ArgTypes...> {
+};
+
+template <class F, class... ArgTypes>
+struct invoke_result : detail::invoke_result<void, F, ArgTypes...> {};
+
+//
+// invoke
+//
+// Origin:
+// http://en.cppreference.com/mwiki/
+//     index.php?title=cpp/utility/functional/invoke&oldid=93823
+
+namespace detail {
+
+template <class T>
+struct is_reference_wrapper : std::false_type {};
+
+template <class U>
+struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
+
+template <class T>
+constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
+
+} // namespace detail
+
+template <class F, class... Args>
+std::invoke_result_t<F, Args...>
+invoke(F&& f,
+       Args&&... args) noexcept(std::is_nothrow_invocable_v<F, Args...>) {
+  return detail::INVOKE(std::forward<F>(f), std::forward<Args>(args)...);
+}
+
+//
+// is_invocable
+//
+
+template <class Fn, class... ArgTypes>
+struct is_invocable
+    : public ::jakalib::bool_constant<::is_detected<detail::INVOKE<R>(
+          std::declval<Fn>(), std::declval<ArgTypes>()...)>::value> {};
 
 //
 // nonesuch
@@ -56,7 +148,7 @@ template <typename... Ts>
 using void_t = typename make_void<Ts...>::type;
 
 //
-// detecor, is_detected
+// is_detected
 //
 // Origin:
 // http://en.cppreference.com/mwiki/
@@ -165,30 +257,30 @@ struct not_fn_t {
 
   template <class... Args>
   auto operator()(Args&&... args) noexcept(
-      noexcept(!std::invoke(f, std::forward<Args>(args)...)))
-      -> decltype(!std::invoke(f, std::forward<Args>(args)...)) {
-    return !invoke(f, std::forward<Args>(args)...);
+      noexcept(!::jakalib::invoke(f, std::forward<Args>(args)...)))
+      -> decltype(!::jakalib::invoke(f, std::forward<Args>(args)...)) {
+    return !::jakalib::invoke(f, ::jakalib::forward<Args>(args)...);
   }
 
   template <class... Args>
   auto operator()(Args&&... args) const
-      noexcept(noexcept(!invoke(f, std::forward<Args>(args)...)))
-          -> decltype(!invoke(f, std::forward<Args>(args)...)) {
-    return !invoke(f, std::forward<Args>(args)...);
+      noexcept(noexcept(!::jakalib::invoke(f, std::forward<Args>(args)...)))
+          -> decltype(!::jakalib::invoke(f, std::forward<Args>(args)...)) {
+    return !::jakalib::invoke(f, std::forward<Args>(args)...);
   }
 
   template <class... Args>
   auto operator()(Args&&... args) volatile noexcept(
-      noexcept(!invoke(f, std::forward<Args>(args)...)))
-      -> decltype(!invoke(f, std::forward<Args>(args)...)) {
-    return !invoke(f, std::forward<Args>(args)...);
+      noexcept(!::jakalib::invoke(f, std::forward<Args>(args)...)))
+      -> decltype(!::jakalib::invoke(f, std::forward<Args>(args)...)) {
+    return !::jakalib::invoke(f, std::forward<Args>(args)...);
   }
 
   template <class... Args>
-  auto operator()(Args&&... args) const
-      volatile noexcept(noexcept(!invoke(f, std::forward<Args>(args)...)))
-          -> decltype(!invoke(f, std::forward<Args>(args)...)) {
-    return !invoke(f, std::forward<Args>(args)...);
+  auto operator()(Args&&... args) const volatile noexcept(
+      noexcept(!::jakalib::invoke(f, std::forward<Args>(args)...)))
+      -> decltype(!::jakalib::invoke(f, std::forward<Args>(args)...)) {
+    return !::jakalib::invoke(f, std::forward<Args>(args)...);
   }
 };
 
