@@ -3,7 +3,7 @@
 //     index.php?title=cpp/experimental/is_detected&oldid=93627
 //
 
-#include "../include/type_traits.h"
+#include "jakalib/type_traits.h"
 #include <cstddef>
 
 template <class T>

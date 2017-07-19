@@ -1,6 +1,7 @@
 #ifndef JAKALIB__TYPE_TRAITS_H
 #define JAKALIB__TYPE_TRAITS_H
 
+#include <functional>
 #include <type_traits>
 
 namespace jakalib {
@@ -24,6 +25,13 @@ struct bool_constant {
     return value;
   }
 };
+
+//
+// decay_t
+//
+
+template <typename T>
+using decay_t = typename std::decay<T>::type;
 
 //
 // invoke_result
@@ -97,26 +105,20 @@ struct is_reference_wrapper : std::false_type {};
 template <class U>
 struct is_reference_wrapper<std::reference_wrapper<U>> : std::true_type {};
 
-template <class T>
-constexpr bool is_reference_wrapper_v = is_reference_wrapper<T>::value;
-
 } // namespace detail
 
 template <class F, class... Args>
-std::invoke_result_t<F, Args...>
-invoke(F&& f,
-       Args&&... args) noexcept(std::is_nothrow_invocable_v<F, Args...>) {
+typename invoke_result<F, Args...>::type invoke(F&& f, Args&&... args) {
   return detail::INVOKE(std::forward<F>(f), std::forward<Args>(args)...);
 }
 
-//
-// is_invocable
-//
-
-template <class Fn, class... ArgTypes>
-struct is_invocable
-    : public ::jakalib::bool_constant<::is_detected<detail::INVOKE<R>(
-          std::declval<Fn>(), std::declval<ArgTypes>()...)>::value> {};
+// We need this version because we don't have access to
+// std::is_nothrow_invocable().
+template <class F, class... Args>
+typename invoke_result<F, Args...>::type
+invoke_noexcept(F&& f, Args&&... args) noexcept {
+  return detail::INVOKE(std::forward<F>(f), std::forward<Args>(args)...);
+}
 
 //
 // nonesuch
@@ -189,6 +191,15 @@ template <class Default, template <class...> class Op, class... Args>
 using detected_or_t = typename detected_or<Default, Op, Args...>::type;
 
 //
+// is_invocable
+//
+
+// template <class Fn, class... ArgTypes>
+// struct is_invocable
+//     : public ::jakalib::bool_constant<::jakalib::is_detected<detail::INVOKE(
+//           std::declval<Fn>(), std::declval<ArgTypes>()...)>::value> {};
+
+//
 // conditional_t
 //
 // Origin:
@@ -259,7 +270,7 @@ struct not_fn_t {
   auto operator()(Args&&... args) noexcept(
       noexcept(!::jakalib::invoke(f, std::forward<Args>(args)...)))
       -> decltype(!::jakalib::invoke(f, std::forward<Args>(args)...)) {
-    return !::jakalib::invoke(f, ::jakalib::forward<Args>(args)...);
+    return !::jakalib::invoke(f, std::forward<Args>(args)...);
   }
 
   template <class... Args>
@@ -287,7 +298,7 @@ struct not_fn_t {
 } // namespace detail
 
 template <class F>
-detail::not_fn_t<std::decay_t<F>> not_fn(F&& f) {
+detail::not_fn_t<::jakalib::decay_t<F>> not_fn(F&& f) {
   return {std::forward<F>(f)};
 }
 
