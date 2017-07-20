@@ -1,7 +1,6 @@
 #ifndef JAKALIB__TYPE_TRAITS_H
 #define JAKALIB__TYPE_TRAITS_H
 
-#include <functional>
 #include <type_traits>
 
 namespace jakalib {
@@ -33,50 +32,89 @@ struct bool_constant {
 template <typename T>
 using decay_t = typename std::decay<T>::type;
 
-//
-// Detection Idiom: void_t, is_detected
-// Origin: http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4502.pdf
-//
+/* Detection Idiom: void_t, nonesuch, is_detected
+ *
+ * Origin:
+ *   http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4502.pdf
+ *   https://gist.github.com/remyroez/6a6ac795452f8ec32b6d617bd6c8d946
+ *
+ * Example usage
+ *
+ * template <typename T>
+ * using copy_assign_op =
+ *     decltype(std::declval<T &>() = std::declval<const T &>());
+ *
+ * template <typename T>
+ * using copy_assignable = is_detected<copy_assign_op, T>;
+ *
+ * struct foo {};
+ * struct bar { bar &operator =(const bar &) = delete; };
+ *
+ * int main()
+ * {
+ *   static_assert( copy_assignable<foo>::value, "foo is not copy assignable");
+ *   static_assert(!copy_assignable<bar>::value, "bar is copy assignable");
+ *   return 0;
+ * }
+ */
 
-struct nonesuch {
-  nonesuch() = delete;
-  ~nonesuch() = delete;
-  nonesuch(nonesuch const&) = delete;
-  void operator=(nonesuch const&) = delete;
-};
+#if (__cplusplus > 201402L)
 
-template <typename... T>
+using std::void_t;
+
+#else
+
+template <typename...>
 using void_t = void;
 
-namespace detail {
-template <class Default, class, template <class...> class Op, class... Args>
-struct detector final {
+#endif
+
+template <class, template <class> class, class = void_t<>>
+struct detect : std::false_type {};
+
+template <class T, template <class> class Op>
+struct detect<T, Op, void_t<Op<T>>> : std::true_type {};
+
+template <class T, class Void, template <class...> class Op, class... Args>
+struct detector {
   using value_t = std::false_type;
-  using type = Default;
+  using type = T;
 };
 
-template <class Default, template <class...> class Op, class... Args>
-struct detector<Default, void_t<Op<Args...>>, Op, Args...> final {
+template <class T, template <class...> class Op, class... Args>
+struct detector<T, void_t<Op<Args...>>, Op, Args...> {
   using value_t = std::true_type;
   using type = Op<Args...>;
 };
-} // namespace detail
+
+struct nonesuch final {
+  nonesuch() = delete;
+  ~nonesuch() = delete;
+  nonesuch(const nonesuch&) = delete;
+  void operator=(const nonesuch&) = delete;
+};
+
+template <class T, template <class...> class Op, class... Args>
+using detected_or = detector<T, void, Op, Args...>;
+
+template <class T, template <class...> class Op, class... Args>
+using detected_or_t = typename detected_or<T, Op, Args...>::type;
 
 template <template <class...> class Op, class... Args>
-using is_detected =
-    typename detail::detector<nonesuch, void, Op, Args...>::value_t;
+using detected = detected_or<nonesuch, Op, Args...>;
 
 template <template <class...> class Op, class... Args>
-using detected_t = typename detail::detector<nonesuch, void, Op, Args...>::type;
+using detected_t = typename detected<Op, Args...>::type;
 
-template <class Default, template <class...> class Op, class... Args>
-using detected_or = detail::detector<Default, void, Op, Args...>;
+template <template <class...> class Op, class... Args>
+using is_detected = typename detected<Op, Args...>::value_t;
 
-template <class Expected, template <class...> class Op, class... Args>
-using is_detected_exact = std::is_same<Expected, detected_t<Op, Args...>>;
+template <class Result, template <class...> class Op, class... Args>
+using is_detected_exact = std::is_same<Result, detected_t<Op, Args...>>;
 
-template <class Default, template <class...> class Op, class... Args>
-using detected_or_t = typename detected_or<Default, Op, Args...>::type;
+template <class Result, template <class...> class Op, class... Args>
+using is_detected_convertible =
+    std::is_convertible<detected_t<Op, Args...>, Result>;
 
 } // namespace jakalib
 
