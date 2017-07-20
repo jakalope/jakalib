@@ -5,7 +5,7 @@ I really like a lot of the new features coming out in C++ and many of them can b
 
 ## Hypothetically FAQ
 
-I take it I'll get very few questions as a result of not bringing any attention to myself. Thus, a true FAQ would be very short.
+I take it I'll get very few questions. Thus, a true FAQ would be very short.
 
 ### Why not just use Boost?
 
