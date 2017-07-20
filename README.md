@@ -3,18 +3,9 @@
 
 I really like a lot of the new features coming out in C++ and many of them can be enabled without additional core language features. This library is just a collection of (mostly other people's) implementations of the features I want.
 
-I do my best to cite sources for implementations, which I do by commenting above it with something like:
-
-```cpp
-// Origin:
-// https://cppreference.com/wiki/the_thing.html
-
-class TheThing {};
-```
-
 ## Hypothetically FAQ
 
-I take it I'll get very few questions as a result of not bringing any attention to myself. Thus, a true FAQ would be very short.
+I take it I'll get very few questions. Thus, a true FAQ would be very short.
 
 ### Why not just use Boost?
 
