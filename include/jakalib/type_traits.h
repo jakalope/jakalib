@@ -64,8 +64,13 @@ using std::void_t;
 
 #else
 
-template <typename...>
-using void_t = void;
+template <typename... Ts>
+struct void_sink {
+  using type = void;
+};
+
+template <typename... Ts>
+using void_t = typename void_sink<Ts...>::type;
 
 #endif
 

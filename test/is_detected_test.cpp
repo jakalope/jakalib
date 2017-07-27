@@ -3,7 +3,7 @@
 using namespace jakalib;
 
 /**
- * Test copy assignment detection.
+ * Test for copy assignment detection.
  *
  * Origin:
  *   http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2015/n4502.pdf
@@ -36,20 +36,22 @@ static_assert(!canonically_copy_assignable<car>::value,
               "car is canonically copy assignable");
 
 /**
- * Test member detection.
+ * Tests for member detection.
  */
 
-template <typename T>
-using foo_member_op = decltype(std::declval<T&>().foo());
+namespace member_function {
 
 template <typename T>
-using has_foo = is_detected<foo_member_op, T>;
+using foo_member = decltype(std::declval<T&>().foo());
 
 template <typename T>
-using has_int_foo = is_detected_exact<int, foo_member_op, T>;
+using has_foo = is_detected<foo_member, T>;
 
 template <typename T>
-using has_int_compatible_foo = is_detected_convertible<int, foo_member_op, T>;
+using has_int_foo = is_detected_exact<int, foo_member, T>;
+
+template <typename T>
+using has_int_compatible_foo = is_detected_convertible<int, foo_member, T>;
 
 // Example usage.
 template <typename T>
@@ -85,12 +87,21 @@ struct int_foo_with_arg {
   }
 };
 
+struct private_int_foo {
+private:
+  int foo() {
+    return 1;
+  }
+};
+
+static_assert(detect<void, has_foo>::value, "");
+
 //
 // is_detected test
 //
 
 template <bool expected, typename TypeUnderTest>
-constexpr bool expectedHasFoo() {
+static constexpr bool expectedHasFoo() {
   return has_foo<TypeUnderTest>::value == expected;
 }
 
@@ -99,13 +110,14 @@ static_assert(expectedHasFoo<true, int_foo>(), "");
 static_assert(expectedHasFoo<true, long_foo>(), "");
 static_assert(expectedHasFoo<true, pointer_foo>(), "");
 static_assert(expectedHasFoo<false, int_foo_with_arg>(), "");
+static_assert(expectedHasFoo<false, private_int_foo>(), "");
 
 //
 // is_detected_exact test
 //
 
 template <bool expected, typename TypeUnderTest>
-constexpr bool expectedHasIntFoo() {
+static constexpr bool expectedHasIntFoo() {
   return has_int_foo<TypeUnderTest>::value == expected;
 }
 
@@ -114,13 +126,14 @@ static_assert(expectedHasIntFoo<true, int_foo>(), "");
 static_assert(expectedHasIntFoo<false, long_foo>(), "");
 static_assert(expectedHasIntFoo<false, pointer_foo>(), "");
 static_assert(expectedHasIntFoo<false, int_foo_with_arg>(), "");
+static_assert(expectedHasIntFoo<false, private_int_foo>(), "");
 
 //
 // is_detected_convertible test
 //
 
 template <bool expected, typename TypeUnderTest>
-constexpr bool expectedHasIntCompatFoo() {
+static constexpr bool expectedHasIntCompatFoo() {
   return has_int_compatible_foo<TypeUnderTest>::value == expected;
 }
 
@@ -129,6 +142,9 @@ static_assert(expectedHasIntCompatFoo<true, int_foo>(), "");
 static_assert(expectedHasIntCompatFoo<true, long_foo>(), "");
 static_assert(expectedHasIntCompatFoo<false, pointer_foo>(), "");
 static_assert(expectedHasIntCompatFoo<false, int_foo_with_arg>(), "");
+static_assert(expectedHasIntCompatFoo<false, private_int_foo>(), "");
+
+} // namespace member_function
 
 int main() {
   return 0;
