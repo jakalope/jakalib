@@ -20,6 +20,10 @@ add_executable(optional_test optional_test.cpp)
 target_link_libraries(optional_test jakalib)
 add_test(optional_test optional_test)
 
+add_executable(container_size_test container_size_test.cpp)
+target_link_libraries(container_size_test jakalib)
+add_test(container_size_test container_size_test)
+
 #add_executable(test_type_traits test_type_traits.cpp)
 #target_link_libraries(test_type_traits jakalib)
 #add_test(test_type_traits test_type_traits)
