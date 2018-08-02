@@ -178,7 +178,7 @@ TEST(value_ctor) {
 
   {
     OracleVal v;
-    tr2::optional<Oracle> oo1{tr2::in_place, v};
+    tr2::optional<Oracle> oo1{jakalib::in_place, v};
     assert(oo1 != tr2::nullopt);
     assert(oo1 != tr2::optional<Oracle>{});
     assert(oo1 == tr2::optional<Oracle>{v});
@@ -187,7 +187,7 @@ TEST(value_ctor) {
     assert(oo1->s == sValueCopyConstructed);
     assert(v.s == sValueConstructed);
 
-    tr2::optional<Oracle> oo2{tr2::in_place, std::move(v)};
+    tr2::optional<Oracle> oo2{jakalib::in_place, std::move(v)};
     assert(oo2 != tr2::nullopt);
     assert(oo2 != tr2::optional<Oracle>{});
     assert(oo2 == oo1);
@@ -302,7 +302,7 @@ TEST(optional_optional) {
   assert(!oi1);
 
   {
-    tr2::optional<tr2::optional<int>> oi2{tr2::in_place};
+    tr2::optional<tr2::optional<int>> oi2{jakalib::in_place};
     assert(oi2 != tr2::nullopt);
     assert(bool(oi2));
     assert(*oi2 == tr2::nullopt);
@@ -311,7 +311,7 @@ TEST(optional_optional) {
   }
 
   {
-    tr2::optional<tr2::optional<int>> oi2{tr2::in_place, tr2::nullopt};
+    tr2::optional<tr2::optional<int>> oi2{jakalib::in_place, tr2::nullopt};
     assert(oi2 != tr2::nullopt);
     assert(bool(oi2));
     assert(*oi2 == tr2::nullopt);
@@ -616,7 +616,7 @@ TEST(example_rationale) {
   //////////////////////////////
   // inconvenient syntax:
   {
-    tr2::optional<std::vector<int>> ov2{tr2::in_place, {2, 3}};
+    tr2::optional<std::vector<int>> ov2{jakalib::in_place, {2, 3}};
 
     assert(bool(ov2));
     assert((*ov2)[1] == 3);
@@ -624,7 +624,7 @@ TEST(example_rationale) {
     ////////////////////////////
 
     std::vector<int> v = {1, 2, 4, 8};
-    optional<std::vector<int>> ov{tr2::in_place, {1, 2, 4, 8}};
+    optional<std::vector<int>> ov{jakalib::in_place, {1, 2, 4, 8}};
 
     assert(v == *ov);
 
@@ -1403,7 +1403,7 @@ static_assert(tr2::optional<int>{3}.value_or(1) == 3, "WTF!");
 static_assert(tr2::optional<int>{}.value_or(4) == 4, "WTF!");
 #endif
 
-constexpr tr2::optional<Combined> gc0{tr2::in_place};
+constexpr tr2::optional<Combined> gc0{jakalib::in_place};
 static_assert(gc0->n == 6, "WTF!");
 
 // optional refs

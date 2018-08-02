@@ -18,6 +18,8 @@
 #include <type_traits>
 #include <utility>
 
+#include "impl/in_place.h"
+
 #define TR2_OPTIONAL_REQUIRES(...)                                             \
   typename std::enable_if<__VA_ARGS__::value, bool>::type = false
 
@@ -250,9 +252,10 @@ constexpr U convert(U v) {
 constexpr struct trivial_init_t {
 } trivial_init{};
 
-// 20.5.6, In-place construction
-constexpr struct in_place_t {
-} in_place{};
+// See impl/in_place.h
+// // 20.5.6, In-place construction
+// constexpr struct in_place_t {
+// } in_place{};
 
 // 20.5.7, Disengaged state indicator
 struct nullopt_t {
