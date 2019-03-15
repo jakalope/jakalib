@@ -6,25 +6,20 @@
 // (See accompanying file LICENSE.md or copy at
 // http://boost.org/LICENSE_1_0.txt)
 
-// Copyright (C) 2011 - 2012 Andrzej Krzemienski.
-//
-// Use, modification, and distribution is subject to the Boost Software
-// License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-//
-// The idea and interface is based on Boost.Optional library
-// authored by Fernando Luis Cacciola Carballal
-
 #ifndef MPARK_IN_PLACE_HPP
 #define MPARK_IN_PLACE_HPP
 
 #include <cstddef>
 
+#include "variant_config.h"
+
 namespace jakalib {
 
-constexpr struct in_place_t {
+struct in_place_t {
   explicit in_place_t() = default;
-} in_place{};
+};
+
+constexpr in_place_t in_place{};
 
 template <std::size_t I>
 struct in_place_index_t {
@@ -37,8 +32,6 @@ struct in_place_type_t {
 };
 
 #ifdef MPARK_VARIABLE_TEMPLATES
-constexpr in_place_t in_place{};
-
 template <std::size_t I>
 constexpr in_place_index_t<I> in_place_index{};
 
