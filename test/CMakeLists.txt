@@ -27,3 +27,7 @@ add_test(container_size_test container_size_test)
 add_executable(inclusion_test inclusion_test.cpp)
 target_link_libraries(inclusion_test jakalib)
 add_test(inclusion_test inclusion_test)
+
+add_executable(math_test math_test.cpp)
+target_link_libraries(math_test jakalib)
+add_test(math_test math_test)
