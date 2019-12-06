@@ -12,9 +12,6 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 #ifndef TCB_SPAN_HPP_INCLUDED
 #define TCB_SPAN_HPP_INCLUDED
 
-// Set the namespace as jakalib instead of 'tcb'
-#define TCB_SPAN_NAMESPACE_NAME jakalib
-
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -35,7 +32,7 @@ http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2019/n4820.pdf
 // Various feature test macros
 
 #ifndef TCB_SPAN_NAMESPACE_NAME
-#define TCB_SPAN_NAMESPACE_NAME tcb
+#define TCB_SPAN_NAMESPACE_NAME jakalib
 #endif
 
 #if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
