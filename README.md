@@ -1,5 +1,5 @@
 # Jakalib
-## A C++11 Implementation of nice-to-have C++14/17/TS libraries
+## A C++11 Implementation of nice-to-have C++14/17/20/TS libraries
 
 I really like a lot of the new features coming out in C++ and many of them can be enabled without additional core language features. This library is just a collection of (mostly other people's) implementations of the features I want.
 
