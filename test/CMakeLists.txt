@@ -31,3 +31,7 @@ add_test(inclusion_test inclusion_test)
 add_executable(math_test math_test.cpp)
 target_link_libraries(math_test jakalib)
 add_test(math_test math_test)
+
+add_executable(span_test span_test.cpp)
+target_link_libraries(span_test jakalib)
+add_test(span_test_case span_test)
