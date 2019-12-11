@@ -1,3 +1,4 @@
+#include <assert.h>
 #include "jakalib/math.h"
 
 using namespace jakalib;
